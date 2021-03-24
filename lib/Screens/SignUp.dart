@@ -1,5 +1,7 @@
+import 'package:chat_app/Helper/HelperFunction.dart';
 import 'package:chat_app/Screens/ChatRoomScreen.dart';
 import 'package:chat_app/Services/Auth.dart';
+import 'package:chat_app/Services/Database.dart';
 import 'package:chat_app/Widgets/Widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,6 +20,7 @@ class _SignUpState extends State<SignUp> {
   final formKey = GlobalKey<FormState>();
 
   AuthMethods authMethods = AuthMethods();
+  DataBaseMathods dataBaseMathods = DataBaseMathods();
 
   TextEditingController userNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -25,6 +28,15 @@ class _SignUpState extends State<SignUp> {
 
   signMeUp() {
     if (formKey.currentState.validate()) {
+      Map<String, String> userInfoMap = {
+        "name": userNameController.text,
+        "email": emailController.text,
+      };
+
+      //Save Email And userName in SP
+      HelperFunction.saveUserEmailSP(emailController.text);
+      HelperFunction.saveUserNameSP(userNameController.text);
+
       setState(() {
         isLoading = true;
       });
@@ -33,6 +45,12 @@ class _SignUpState extends State<SignUp> {
               emailController.text, passwordController.text)
           .then((value) {
         // print("${value.uId}");
+
+        dataBaseMathods.uploadUserInfo(userInfoMap);
+
+        //save SP if user loggedin or not
+        HelperFunction.saveUserLoggedInSP(true);
+
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => ChatRoom()));
       });
